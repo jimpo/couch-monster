@@ -6,6 +6,9 @@
         "npm": "1.1.x"
     },
     "dependencies": {
-
+        "chai": "1.2.x",
+        "mocha": "1.4.x",
+        "sinon": "1.4.x",
+        "sinon-chai": "2.1.x"
     }
 }
