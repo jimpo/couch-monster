@@ -43,6 +43,23 @@ describe('monster', function () {
                marvin.attributes.should.deep.equal({});
            });
 
+        it('should make attributes readonly', function () {
+            var marvin = new Monster();
+            var assignment = function () {
+                marvin.attributes = {};
+            };
+            assignment.should.throw(TypeError, /read only/);
+        });
+
+        it('should make "type" attribute readonly', function () {
+            var factory = function () {
+                return new Monster({
+                    type: 'blah',
+                });
+            };
+            factory.should.throw(TypeError, /read only/);
+        });
+
         it('constructor should call initialize on object', function () {
             var options = {
                 initialize: sinon.spy(),
