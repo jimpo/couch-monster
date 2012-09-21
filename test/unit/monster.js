@@ -103,4 +103,23 @@ describe('#define()', function () {
             });
         });
     });
+
+    describe('#get()', function () {
+        it('should return attribute if present', function () {
+            var marvin = new Monster('marvin', {
+                scary: true,
+                teeth: 'sharp',
+            });
+            expect(marvin.get('scary')).to.exist;
+            marvin.get('scary').should.equal(true);
+        });
+
+        it('should return undefined unless present', function () {
+            var marvin = new Monster('marvin', {
+                scary: true,
+                teeth: 'sharp',
+            });
+            expect(marvin.get('fake field')).not.to.exist;
+        });
+    });
 });

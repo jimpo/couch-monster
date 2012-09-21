@@ -7,6 +7,7 @@
         "npm": "1.1.x"
     },
     "dependencies": {
+        "backbone": "0.9.x",
         "chai": "1.2.x",
         "mocha": "1.4.x",
         "sinon": "1.4.x",
