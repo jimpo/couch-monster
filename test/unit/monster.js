@@ -3,18 +3,18 @@
 var monster = require('monster');
 
 
-describe('monster', function () {
-    describe('#define()', function () {
-        var Monster;
+describe('#define()', function () {
+    var Monster;
 
-        beforeEach(function () {
-            Monster = monster.define('Monster');
-        });
+    beforeEach(function () {
+        Monster = monster.define('Monster');
+    });
 
-        it('should return a new constructor function', function () {
-            Monster.should.be.a('function');
-        });
+    it('should return a new constructor function', function () {
+        Monster.should.be.a('function');
+    });
 
+    describe('constructor', function () {
         it('should return a function with name matching argument', function () {
             Monster.name.should.equal('Monster');
         });
@@ -26,12 +26,12 @@ describe('monster', function () {
 
         it('should initialize attributes to constructor argument', function () {
             var marvin = new Monster('marvin', {
-                location: 'closet',
+                location: 'couch',
                 scary: true,
             });
             marvin.attributes.should.deep.equal({
                 _id: 'marvin',
-                location: 'closet',
+                location: 'couch',
                 scary: true,
             });
         });
@@ -54,19 +54,53 @@ describe('monster', function () {
         it('should make "type" attribute readonly', function () {
             var factory = function () {
                 return new Monster({
-                    type: 'blah',
+                    type: 'Not Monster',
                 });
             };
             factory.should.throw(TypeError, /read only/);
         });
 
-        it('constructor should call initialize on object', function () {
+        it('should call initialize on object', function () {
             var options = {
                 initialize: sinon.spy(),
             };
             var Monster = monster.define('Monster', options);
             var marvin = new Monster('marvin');
             options.initialize.should.have.been.calledOn(marvin);
+        });
+
+        it('should set attributes to default values', function () {
+            var options = {
+                defaults: {
+                    location: 'couch',
+                    scary: false,
+                }
+            };
+            var Monster = monster.define('Monster', options);
+            var marvin = new Monster();
+            marvin.attributes.should.deep.equal({
+                location: 'couch',
+                scary: false,
+            });
+        });
+
+        it('should not overwrite given attributes with defaults', function () {
+            var options = {
+                defaults: {
+                    location: 'couch',
+                    scary: false,
+                }
+            };
+            var Monster = monster.define('Monster', options);
+            var marvin = new Monster({
+                scary: true,
+                teeth: 'sharp',
+            });
+            marvin.attributes.should.deep.equal({
+                location: 'couch',
+                scary: true,
+                teeth: 'sharp',
+            });
         });
     });
 });
