@@ -115,7 +115,7 @@ describe('Model', function () {
     beforeEach(function () {
         marvin = new Monster('marvin', {
             scary: true,
-            teeth: 'sharp',
+            location: 'couch',
         });
     });
 
@@ -127,6 +127,35 @@ describe('Model', function () {
 
         it('should return undefined unless present', function () {
             expect(marvin.get('fake field')).not.to.exist;
+        });
+    });
+
+    describe('#set()', function () {
+        it('should set attributes given an object', function () {
+            marvin.set({
+                teeth: 'sharp',
+                friendly: true,
+            });
+            marvin.attributes.teeth.should.equal('sharp');
+            marvin.attributes.friendly.should.equal(true);
+        });
+
+        it('should override old attributes', function () {
+            marvin.set({scary: false});
+            marvin.attributes.scary.should.equal(false);
+        });
+
+        it('should keep old attributes', function () {
+            marvin.set({
+                teeth: 'sharp',
+                friendly: true,
+            });
+            marvin.attributes.location.should.equal('couch');
+        });
+
+        it('should set one attribute given key and value', function () {
+            marvin.set('friendly', true);
+            marvin.attributes.friendly.should.equal(true);
         });
     });
 
@@ -143,8 +172,8 @@ describe('Model', function () {
 
     describe('#unset()', function () {
         it('should clear attribute and return true', function () {
-            marvin.unset('teeth').should.be.true;
-            marvin.attributes.should.not.have.property('teeth');
+            marvin.unset('location').should.be.true;
+            marvin.attributes.should.not.have.property('location');
         });
 
         it('should be false on nonexistent attribute', function () {
