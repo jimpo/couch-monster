@@ -51,10 +51,10 @@ describe('#define()', function () {
             assignment.should.throw(TypeError, /read only/);
         });
 
-        it('should make "type" attribute readonly', function () {
+        it('should make "_type" attribute readonly', function () {
             var factory = function () {
                 return new Monster({
-                    type: 'Not Monster',
+                    _type: 'Not Monster',
                 });
             };
             factory.should.throw(TypeError, /read only/);
@@ -103,23 +103,52 @@ describe('#define()', function () {
             });
         });
     });
+});
+
+describe('Model', function () {
+    var Monster, marvin;
+
+    before(function () {
+        Monster = monster.define('Monster');
+    });
+
+    beforeEach(function () {
+        marvin = new Monster('marvin', {
+            scary: true,
+            teeth: 'sharp',
+        });
+    });
 
     describe('#get()', function () {
         it('should return attribute if present', function () {
-            var marvin = new Monster('marvin', {
-                scary: true,
-                teeth: 'sharp',
-            });
             expect(marvin.get('scary')).to.exist;
             marvin.get('scary').should.equal(true);
         });
 
         it('should return undefined unless present', function () {
-            var marvin = new Monster('marvin', {
-                scary: true,
-                teeth: 'sharp',
-            });
             expect(marvin.get('fake field')).not.to.exist;
+        });
+    });
+
+    describe('#has()', function () {
+        it('should be true if attribute exists', function () {
+            marvin.attributes.friendly = undefined;
+            marvin.has('friendly').should.be.true;
+        });
+
+        it('should be false if attribute does not exist', function () {
+            marvin.has('friendly').should.be.false;
+        });
+    });
+
+    describe('#unset()', function () {
+        it('should clear attribute and return true', function () {
+            marvin.unset('teeth').should.be.true;
+            marvin.attributes.should.not.have.property('teeth');
+        });
+
+        it('should be false on nonexistent attribute', function () {
+            marvin.unset('fake attribute').should.be.false;
         });
     });
 });
