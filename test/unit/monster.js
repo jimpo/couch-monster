@@ -13,4 +13,20 @@ describe('monster', function () {
             monster.define('Monster').name.should.equal('Monster');
         });
     });
+
+    describe('defined Monster', function () {
+        var Monster, options;
+
+        before(function () {
+            options = {
+                initialize: sinon.spy(),
+            };
+            Monster = monster.define('Monster', options);
+        });
+
+        it('should call initialize in constructor', function () {
+            var marvin = new Monster('marvin');
+            options.initialize.should.have.been.calledOn(marvin);
+        });
+    });
 });
