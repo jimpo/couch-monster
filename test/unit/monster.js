@@ -236,4 +236,25 @@ describe('Model', function () {
             marvin.isNew().should.be.false;
         });
     });
+
+    describe('#validate()', function () {
+        it('should return undefined if no schema is given', function () {
+            expect(marvin.validate()).not.to.exist;
+        });
+
+        it('should validate attributes against schema using monster validator',
+           function () {
+               var schema = {type: 'object'};
+               var Monster = monster.define('Monster', {
+                   schema: schema,
+               });
+               sinon.stub(monster.validator, 'validate');
+
+               var marvin = new Monster('marvin');
+               marvin.validate();
+               monster.validator.validate.should.have.been.calledWith(
+                   marvin.attributes, schema);
+               monster.validator.validate.restore();
+           });
+    });
 });
