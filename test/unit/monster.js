@@ -238,21 +238,26 @@ describe('Model', function () {
     });
 
     describe('#validate()', function () {
+        var Monster, marvin, schema;
+
+        before(function () {
+            schema = {type: 'object'};
+            Monster = monster.define('Monster', {
+                schema: schema,
+            });
+            marvin = new Monster('marvin');
+        });
+
         it('should return undefined if no schema is given', function () {
             expect(marvin.validate()).not.to.exist;
         });
 
         it('should validate attributes against schema using monster validator',
            function () {
-               var schema = {type: 'object'};
-               var Monster = monster.define('Monster', {
-                   schema: schema,
-               });
                sinon.stub(monster.validator, 'validate').returns({
                    errors: ['array of errors'],
                });
 
-               var marvin = new Monster('marvin');
                marvin.validate();
                monster.validator.validate.should.have.been.calledWith(
                    marvin.attributes, schema);
@@ -260,31 +265,37 @@ describe('Model', function () {
            });
 
         it('should return the validation report\'s errors', function () {
-            var Monster = monster.define('Monster', {
-                schema: {type: 'object'},
-            });
             var errors = ['array of errors'];
             sinon.stub(monster.validator, 'validate').returns({
                 errors: errors,
             });
 
-            var marvin = new Monster('marvin');
             marvin.validate().should.equal(errors);
             monster.validator.validate.restore();
         });
 
         it('should return undefined if there are no validation errors',
            function () {
-               var Monster = monster.define('Monster', {
-                   schema: {type: 'object'},
-               });
                sinon.stub(monster.validator, 'validate').returns({
                    errors: [],
                });
 
-               var marvin = new Monster('marvin');
                expect(marvin.validate()).not.to.exist;
                monster.validator.validate.restore();
            });
+    });
+
+    describe('#isValid()', function () {
+        it('should be true if there are no errors', function () {
+            sinon.stub(marvin, 'validate').returns(undefined);
+            marvin.isValid().should.be.true;
+            marvin.validate.restore();
+        });
+
+        it('should be false if there are errors', function () {
+            sinon.stub(marvin, 'validate').returns(['errors']);
+            marvin.isValid().should.be.false;
+            marvin.validate.restore();
+        });
     });
 });
