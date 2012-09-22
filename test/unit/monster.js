@@ -129,7 +129,6 @@ describe('Model', function () {
 
     describe('#clone()', function () {
         it('should be a clone of the model', function () {
-            console.log('_type' in marvin.attributes);
             var clone = marvin.clone();
             clone.should.not.equal(marvin);
             clone.should.deep.equal(marvin);
@@ -313,6 +312,14 @@ describe('Model', function () {
             sinon.stub(marvin, 'validate').returns(['errors']);
             marvin.isValid().should.be.false;
             marvin.validate.restore();
+        });
+    });
+});
+
+describe('#initialize()', function () {
+    it('should set monster.db to something', function () {
+        monster.initialize({}, function (err) {
+            expect(monster.db).to.exist;
         });
     });
 });
