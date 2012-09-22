@@ -159,6 +159,26 @@ describe('Model', function () {
         });
     });
 
+    describe('#escape()', function () {
+        it('should return safe attributes', function () {
+            marvin.set('owner', 'Lord Byron');
+            marvin.escape('owner').should.equal('Lord Byron');
+        });
+
+        it('should return html escaped string', function () {
+            marvin.set('owner', 'Bill & Ted');
+            marvin.escape('owner').should.equal('Bill &amp; Ted');
+            marvin.set('owner', 'Old > Gregg');
+            marvin.escape('owner').should.equal('Old &gt; Gregg');
+            marvin.set('weight', 200);
+            marvin.escape('weight').should.equal('200');
+        });
+
+        it('should return empty string for undefined attributes', function () {
+            marvin.escape('owner').should.equal('');
+        });
+    });
+
     describe('#has()', function () {
         it('should be true if attribute exists', function () {
             marvin.attributes.friendly = undefined;
@@ -178,6 +198,13 @@ describe('Model', function () {
 
         it('should be false on nonexistent attribute', function () {
             marvin.unset('fake attribute').should.be.false;
+        });
+    });
+
+    describe('#clear()', function () {
+        it('should delete all attributes', function () {
+            marvin.clear();
+            marvin.attributes.should.be.empty;
         });
     });
 });
