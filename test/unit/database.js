@@ -1,6 +1,7 @@
 'use strict';
 
 var database = require('database');
+var monster = require('monster');
 
 var nanolib = require('nano');
 
@@ -48,7 +49,7 @@ describe('#initialize()', function () {
     it('should check if the database exists', function (done) {
         var mock = sinon.mock(nano.db);
         mock.expects('get').withArgs('marvin').yields();
-        database.initialize({name: 'marvin'}, function (err) {
+        database.initialize({db: 'marvin'}, function (err) {
             mock.verify();
             done(err);
         });
@@ -57,13 +58,13 @@ describe('#initialize()', function () {
     it('should create database if it does not exist and option set',
        function (done) {
            var options = {
-               name: 'marvin',
+               db: 'marvin',
                createDatabase: true,
            };
            sinon.stub(nano.db, 'get').yields(
                new Error('Database does not exist.'));
            var mock = sinon.mock(nano.db);
-           mock.expects('create').withArgs(options.name).yields();
+           mock.expects('create').withArgs(options.db).yields();
            database.initialize(options, function (err) {
                mock.verify();
                done(err);
@@ -72,7 +73,7 @@ describe('#initialize()', function () {
 
     it('should not create database if option is not set', function (done) {
         var options = {
-            name: 'marvin',
+            db: 'marvin',
         };
         sinon.stub(nano.db, 'get').yields(
             new Error('Database does not exist.'));
@@ -82,6 +83,21 @@ describe('#initialize()', function () {
             expect(err).to.exist;
             err.message.should.equal('Database does not exist.');
             mock.verify();
+            done();
+        });
+    });
+
+    it('should set monster.db to nano database object', function (done) {
+        var options = {
+            db: 'marvin',
+        };
+        sinon.stub(nano.db, 'get').yields();
+        database.initialize(options, function (err) {
+            expect(monster.db).to.exist;
+            monster.db.config.should.deep.equal({
+                url: 'https://couchmonster.com:443',
+                db: 'marvin',
+            });
             done();
         });
     });
