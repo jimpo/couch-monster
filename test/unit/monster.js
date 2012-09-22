@@ -207,4 +207,33 @@ describe('Model', function () {
             marvin.attributes.should.be.empty;
         });
     });
+
+    describe('#id()', function () {
+        it('should return the _id attribute', function () {
+            marvin.id().should.equal('marvin');
+        });
+    });
+
+    describe('#rev()', function () {
+        it('should return the _rev attribute', function () {
+            marvin.set('_rev', 'rev');
+            marvin.rev().should.equal('rev');
+        });
+    });
+
+    describe('#isNew()', function () {
+        it('should be true unless model has rev', function () {
+            marvin.isNew().should.be.true;
+        });
+
+        it('should be true unless model has id', function () {
+            marvin = new Monster({_rev: 'rev'});
+            marvin.isNew().should.be.true;
+        });
+
+        it('should be false if model has id and rev', function () {
+            marvin.set('_rev', 'rev');
+            marvin.isNew().should.be.false;
+        });
+    });
 });
