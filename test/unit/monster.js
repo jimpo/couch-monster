@@ -248,12 +248,42 @@ describe('Model', function () {
                var Monster = monster.define('Monster', {
                    schema: schema,
                });
-               sinon.stub(monster.validator, 'validate');
+               sinon.stub(monster.validator, 'validate').returns({
+                   errors: ['array of errors'],
+               });
 
                var marvin = new Monster('marvin');
                marvin.validate();
                monster.validator.validate.should.have.been.calledWith(
                    marvin.attributes, schema);
+               monster.validator.validate.restore();
+           });
+
+        it('should return the validation report\'s errors', function () {
+            var Monster = monster.define('Monster', {
+                schema: {type: 'object'},
+            });
+            var errors = ['array of errors'];
+            sinon.stub(monster.validator, 'validate').returns({
+                errors: errors,
+            });
+
+            var marvin = new Monster('marvin');
+            marvin.validate().should.equal(errors);
+            monster.validator.validate.restore();
+        });
+
+        it('should return undefined if there are no validation errors',
+           function () {
+               var Monster = monster.define('Monster', {
+                   schema: {type: 'object'},
+               });
+               sinon.stub(monster.validator, 'validate').returns({
+                   errors: [],
+               });
+
+               var marvin = new Monster('marvin');
+               expect(marvin.validate()).not.to.exist;
                monster.validator.validate.restore();
            });
     });
