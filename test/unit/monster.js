@@ -119,6 +119,23 @@ describe('Model', function () {
         });
     });
 
+    describe('#toJSON()', function () {
+        it('should be a clone of model attributes', function () {
+            var json = marvin.toJSON();
+            json.should.not.equal(marvin.attributes);
+            json.should.deep.equal(marvin.attributes);
+        });
+    });
+
+    describe('#clone()', function () {
+        it('should be a clone of the model', function () {
+            console.log('_type' in marvin.attributes);
+            var clone = marvin.clone();
+            clone.should.not.equal(marvin);
+            clone.should.deep.equal(marvin);
+        });
+    });
+
     describe('#get()', function () {
         it('should return attribute if present', function () {
             expect(marvin.get('scary')).to.exist;
