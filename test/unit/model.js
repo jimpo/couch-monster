@@ -332,11 +332,11 @@ describe('#define()', function () {
 
             describe('#fetch()', function () {
                 it('should retrieve object from database', function (done) {
-                    var model = new Monster('marvin');
+                    var marvin = new Monster('marvin');
                     mock.expects('get').withArgs('marvin')
                         .yields(null, marvin.attributes);
-                    model.fetch(function (err) {
-                        model.attributes.should.deep.equal(marvin.attributes);
+                    marvin.fetch(function (err) {
+                        marvin.attributes.should.deep.equal(marvin.attributes);
                         done(err);
                     });
                 });
@@ -354,41 +354,37 @@ describe('#define()', function () {
                     expected._id = 'marvin';
                     expected._type = 'Monster';
 
-                    var model = marvin.clone();
                     mock.expects('insert').once()
                         .withArgs(expected, 'marvin')
                         .yields(null, res);
-                    model.save(done);
+                    marvin.save(done);
                 });
 
                 it('should set revision of model', function (done) {
-                    var model = marvin.clone();
                     mock.expects('insert').yields(null, res);
-                    model.save(function (err) {
-                        model.get('_rev').should.equal('rev');
+                    marvin.save(function (err) {
+                        marvin.get('_rev').should.equal('rev');
                         done(err);
                     });
                 });
 
                 it('should create without id', function (done) {
-                    var model = marvin.clone();
-                    model.unset('_id');
+                    marvin.unset('_id');
 
-                    var expected = model.toJSON();
+                    var expected = marvin.toJSON();
                     expected._type = 'Monster';
 
                     mock.expects('insert').once()
                         .withArgs(expected, undefined)
                         .yields(null, res);
-                    model.save(function (err) {
-                        model.get('_id').should.equal('marvin');
+                    marvin.save(function (err) {
+                        marvin.get('_id').should.equal('marvin');
                         done(err);
                     });
                 });
 
                 it('should update with id and rev', function (done) {
-                    var model = marvin.clone();
-                    model.set('_rev', 'rev');
+                    marvin.set('_rev', 'rev');
 
                     var res = {
                         ok: true,
@@ -396,17 +392,16 @@ describe('#define()', function () {
                         _rev: 'rev2',
                     };
                     mock.expects('insert').yields(null, res);
-                    model.save(function (err) {
-                        model.rev().should.equal('rev2');
+                    marvin.save(function (err) {
+                        marvin.rev().should.equal('rev2');
                         done(err);
                     });
                 });
 
                 it('should yield ValidationError if model is invalid', function (done) {
-                    var model = marvin.clone();
-                    sinon.stub(model, 'validate').returns(['Oh no']);
+                    sinon.stub(marvin, 'validate').returns(['Oh no']);
                     mock.expects('insert').never();
-                    model.save(function (err) {
+                    marvin.save(function (err) {
                         err.name.should.equal('ValidationError');
                         err.errors.should.deep.equal(['Oh no']);
                         done();
@@ -414,11 +409,10 @@ describe('#define()', function () {
                 });
 
                 it('should yield UniquenessError if id is taken', function(done) {
-                    var model = marvin.clone();
                     mock.expects('insert').yields(errs.create({
                         status_code: 409,
                     }));
-                    model.save(function (err) {
+                    marvin.save(function (err) {
                         err.name.should.equal('UniquenessError');
                         err.message.should.equal('ID "marvin" already exists');
                         done();
@@ -428,7 +422,7 @@ describe('#define()', function () {
 
             describe('#destroy()', function () {
                 it('should delete with id and rev', function (done) {
-                    var model = new Monster('marvin', {_rev: 'rev'});
+                    marvin.set('_rev', 'rev');
                     var res = {
                         ok: true,
                         _id: 'marvin',
@@ -437,9 +431,9 @@ describe('#define()', function () {
                     mock.expects('destroy').once()
                         .withArgs('marvin', 'rev')
                         .yields(null, res);
-                    model.destroy(function (err) {
-                        model.id().should.equal('marvin');
-                        model.rev().should.equal('rev2');
+                    marvin.destroy(function (err) {
+                        marvin.id().should.equal('marvin');
+                        marvin.rev().should.equal('rev2');
                         done(err);
                     });
                 });
