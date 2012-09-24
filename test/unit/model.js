@@ -452,5 +452,24 @@ describe('Model', function () {
                 });
             });
         });
+
+        describe('#destroy()', function () {
+            it('should delete with id and rev', function (done) {
+                var model = new Monster('marvin', {_rev: 'rev'});
+                var res = {
+                    ok: true,
+                    _id: 'marvin',
+                    _rev: 'rev2',
+                };
+                mock.expects('destroy').once()
+                    .withArgs('marvin', 'rev')
+                    .yields(null, res);
+                model.destroy(function (err) {
+                    model.id().should.equal('marvin');
+                    model.rev().should.equal('rev2');
+                    done(err);
+                });
+            });
+        });
     });
 });
