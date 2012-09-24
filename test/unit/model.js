@@ -314,4 +314,45 @@ describe('Model', function () {
             marvin.validate.restore();
         });
     });
+
+    describe('persistence', function () {
+        var mock;
+
+        beforeEach(function () {
+            monster.db = {
+                get: function(){},
+                insert: function(){},
+                destroy: function(){},
+                head: function(){},
+            };
+            mock = sinon.mock(monster.db);
+        });
+
+        afterEach(function () {
+            mock.verify();
+            mock.restore();
+        });
+
+        describe('#exists()', function () {
+            it('should yield revision if object exists', function (done) {
+                var headers = {etag: '"rev"'};
+                mock.expects('head').withArgs('marvin')
+                    .yields(null, null, headers);
+                marvin.exists(function (err, revision) {
+                    revision.should.equal('rev');
+                    done(err);
+                });
+            });
+
+            it("should be falsy if object doesn't exist", function (done) {
+                var error = new Error();
+                error.status_code = 404;
+                mock.expects('head').withArgs('marvin').yields(error);
+                marvin.exists(function (err, revision) {
+                    expect(revision).not.to.be.ok;
+                    done(err);
+                });
+            });
+        });
+    });
 });
