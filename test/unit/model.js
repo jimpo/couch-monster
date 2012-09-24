@@ -354,5 +354,17 @@ describe('Model', function () {
                 });
             });
         });
+
+        describe('#fetch()', function () {
+            it('should retrieve object from database', function (done) {
+                var model = new Monster('marvin');
+                mock.expects('get').withArgs('marvin')
+                    .yields(null, marvin.attributes);
+                model.fetch(function (err) {
+                    model.attributes.should.deep.equal(marvin.attributes);
+                    done(err);
+                });
+            });
+        });
     });
 });
