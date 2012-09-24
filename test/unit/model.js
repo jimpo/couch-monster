@@ -2,6 +2,8 @@
 
 var monster = require('monster');
 
+var errs = require('errs');
+
 
 describe('#define()', function () {
     var Monster;
@@ -363,6 +365,90 @@ describe('Model', function () {
                 model.fetch(function (err) {
                     model.attributes.should.deep.equal(marvin.attributes);
                     done(err);
+                });
+            });
+        });
+
+        describe('#save()', function () {
+            var res = {
+                ok: true,
+                _id: 'marvin',
+                _rev: 'rev',
+            };
+
+            it('should save attributes with _type', function (done) {
+                var expected = marvin.toJSON();
+                expected._id = 'marvin';
+                expected._type = 'Monster';
+
+                var model = marvin.clone();
+                mock.expects('insert').once()
+                    .withArgs(expected, 'marvin')
+                    .yields(null, res);
+                model.save(done);
+            });
+
+            it('should set revision of model', function (done) {
+                var model = marvin.clone();
+                mock.expects('insert').yields(null, res);
+                model.save(function (err) {
+                    model.get('_rev').should.equal('rev');
+                    done(err);
+                });
+            });
+
+            it('should create without id', function (done) {
+                var model = marvin.clone();
+                model.unset('_id');
+
+                var expected = model.toJSON();
+                expected._type = 'Monster';
+
+                mock.expects('insert').once()
+                    .withArgs(expected, undefined)
+                    .yields(null, res);
+                model.save(function (err) {
+                    model.get('_id').should.equal('marvin');
+                    done(err);
+                });
+            });
+
+            it('should update with id and rev', function (done) {
+                var model = marvin.clone();
+                model.set('_rev', 'rev');
+
+                var res = {
+                    ok: true,
+                    _id: 'marvin',
+                    _rev: 'rev2',
+                };
+                mock.expects('insert').yields(null, res);
+                model.save(function (err) {
+                    model.rev().should.equal('rev2');
+                    done(err);
+                });
+            });
+
+            it('should yield ValidationError if model is invalid', function (done) {
+                var model = marvin.clone();
+                sinon.stub(model, 'validate').returns(['Oh no']);
+                mock.expects('insert').never();
+                model.save(function (err) {
+                    err.name.should.equal('ValidationError');
+                    err.errors.should.deep.equal(['Oh no']);
+                    done();
+                });
+            });
+
+            it('should yield UniquenessError if id is taken', function(done) {
+                var model = marvin.clone();
+                mock.expects('insert').yields(errs.create({
+                    status_code: 409,
+                }));
+                model.save(function (err) {
+                    err.name.should.equal('UniquenessError');
+                    err.message.should.equal('ID "marvin" already exists');
+                    done();
                 });
             });
         });
