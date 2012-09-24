@@ -20,6 +20,17 @@ describe('#define()', function () {
         Monster.name.should.equal('Monster');
     });
 
+    it('should save model in monster.models', function () {
+        monster.models.Monster.should.equal(Monster);
+    });
+
+    it('should throw error if model name is already defined', function () {
+        var definition = function () {
+            monster.define('Monster');
+        };
+        definition.should.throw(/Model "Monster" is already defined./);
+    });
+
     describe('constructor', function () {
         it('should set id to given id', function () {
             var marvin = new Monster('marvin');
@@ -66,13 +77,13 @@ describe('#define()', function () {
             var options = {
                 initialize: sinon.spy(),
             };
-            var Monster = monster.define('Monster', options);
+            var Monster = monster.define('MonsterInitialize', options);
             var marvin = new Monster('marvin');
             options.initialize.should.have.been.calledOn(marvin);
         });
 
         it('should set attributes to default values', function () {
-            var Monster = monster.define('Monster', {
+            var Monster = monster.define('MonsterDefaults', {
                 defaults: {
                     location: 'couch',
                     scary: false,
@@ -83,10 +94,11 @@ describe('#define()', function () {
                 location: 'couch',
                 scary: false,
             });
+            delete monster.models.MonsterDefaults;
         });
 
         it('should not overwrite given attributes with defaults', function () {
-            var Monster = monster.define('Monster', {
+            var Monster = monster.define('MonsterDefaults', {
                 defaults: {
                     location: 'couch',
                     scary: false,
@@ -101,6 +113,7 @@ describe('#define()', function () {
                 scary: true,
                 teeth: 'sharp',
             });
+            delete monster.models.MonsterDefaults;
         });
     });
 
@@ -233,7 +246,7 @@ describe('#define()', function () {
 
             before(function () {
                 schema = {type: 'object'};
-                Monster = monster.define('Monster', {
+                Monster = monster.define('MonsterSchema', {
                     schema: schema,
                 });
                 marvin = new Monster('marvin');
