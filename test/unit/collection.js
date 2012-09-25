@@ -38,6 +38,14 @@ describe('Collection', function () {
         });
     });
 
+    describe('#pluck()', function () {
+        it('should return list of attributes from models', function () {
+            collection.push(new Monster({name: 'marvin'}));
+            collection.push(new Monster({name: 'charlie'}));
+            collection.pluck('name').should.deep.equal(['marvin', 'charlie']);
+        });
+    });
+
     describe('persistence', function () {
         var mock;
 
