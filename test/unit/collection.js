@@ -37,4 +37,30 @@ describe('Collection', function () {
             collection.should.respondTo(method);
         });
     });
+
+    describe('persistence', function () {
+        var mock;
+
+        beforeEach(function () {
+            monster.db = {
+                fetch: function(){},
+                bulk: function(){},
+            };
+            mock = sinon.mock(monster.db);
+        });
+
+        afterEach(function () {
+            mock.verify();
+            mock.restore();
+        });
+
+        describe('#fetch()', function () {
+            it('should make bulk fetch call with model ids', function (done) {
+                collection.push(new Monster('marvin'), new Monster('charlie'));
+                mock.expects('fetch').withArgs(['marvin', 'charlie'])
+                    .yields(null);
+                collection.fetch(done);
+            });
+        });
+    });
 });
