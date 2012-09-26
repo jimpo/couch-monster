@@ -20,6 +20,17 @@ describe('#define()', function () {
         Monster.name.should.equal('Monster');
     });
 
+    it('should save model in monster.models', function () {
+        monster.models.Monster.should.equal(Monster);
+    });
+
+    it('should throw error if model name is already defined', function () {
+        var definition = function () {
+            monster.define('Monster');
+        };
+        definition.should.throw(/Model "Monster" is already defined./);
+    });
+
     describe('constructor', function () {
         it('should set id to given id', function () {
             var marvin = new Monster('marvin');
@@ -53,10 +64,10 @@ describe('#define()', function () {
             assignment.should.throw(TypeError, /read only/);
         });
 
-        it('should make "_type" attribute readonly', function () {
+        it('should make "type" attribute readonly', function () {
             var factory = function () {
                 return new Monster({
-                    _type: 'Not Monster',
+                    type: 'Not Monster',
                 });
             };
             factory.should.throw(TypeError, /read only/);
@@ -66,13 +77,13 @@ describe('#define()', function () {
             var options = {
                 initialize: sinon.spy(),
             };
-            var Monster = monster.define('Monster', options);
+            var Monster = monster.define('MonsterInitialize', options);
             var marvin = new Monster('marvin');
             options.initialize.should.have.been.calledOn(marvin);
         });
 
         it('should set attributes to default values', function () {
-            var Monster = monster.define('Monster', {
+            var Monster = monster.define('MonsterDefaults', {
                 defaults: {
                     location: 'couch',
                     scary: false,
@@ -83,10 +94,11 @@ describe('#define()', function () {
                 location: 'couch',
                 scary: false,
             });
+            delete monster.models.MonsterDefaults;
         });
 
         it('should not overwrite given attributes with defaults', function () {
-            var Monster = monster.define('Monster', {
+            var Monster = monster.define('MonsterDefaults', {
                 defaults: {
                     location: 'couch',
                     scary: false,
@@ -101,6 +113,7 @@ describe('#define()', function () {
                 scary: true,
                 teeth: 'sharp',
             });
+            delete monster.models.MonsterDefaults;
         });
     });
 
@@ -233,7 +246,7 @@ describe('#define()', function () {
 
             before(function () {
                 schema = {type: 'object'};
-                Monster = monster.define('Monster', {
+                Monster = monster.define('MonsterSchema', {
                     schema: schema,
                 });
                 marvin = new Monster('marvin');
@@ -345,14 +358,14 @@ describe('#define()', function () {
             describe('#save()', function () {
                 var res = {
                     ok: true,
-                    _id: 'marvin',
-                    _rev: 'rev',
+                    id: 'marvin',
+                    rev: 'rev',
                 };
 
-                it('should save attributes with _type', function (done) {
+                it('should save attributes with type', function (done) {
                     var expected = marvin.toJSON();
                     expected._id = 'marvin';
-                    expected._type = 'Monster';
+                    expected.type = 'Monster';
 
                     mock.expects('insert').once()
                         .withArgs(expected, 'marvin')
@@ -372,7 +385,7 @@ describe('#define()', function () {
                     marvin.unset('_id');
 
                     var expected = marvin.toJSON();
-                    expected._type = 'Monster';
+                    expected.type = 'Monster';
 
                     mock.expects('insert').once()
                         .withArgs(expected, undefined)
@@ -388,8 +401,8 @@ describe('#define()', function () {
 
                     var res = {
                         ok: true,
-                        _id: 'marvin',
-                        _rev: 'rev2',
+                        id: 'marvin',
+                        rev: 'rev2',
                     };
                     mock.expects('insert').yields(null, res);
                     marvin.save(function (err) {
@@ -425,8 +438,8 @@ describe('#define()', function () {
                     marvin.set('_rev', 'rev');
                     var res = {
                         ok: true,
-                        _id: 'marvin',
-                        _rev: 'rev2',
+                        id: 'marvin',
+                        rev: 'rev2',
                     };
                     mock.expects('destroy').once()
                         .withArgs('marvin', 'rev')
@@ -434,6 +447,22 @@ describe('#define()', function () {
                     marvin.destroy(function (err) {
                         marvin.id().should.equal('marvin');
                         marvin.rev().should.equal('rev2');
+                        done(err);
+                    });
+                });
+
+                it('should set _deleted to true', function (done) {
+                    marvin.set('_rev', 'rev');
+                    var res = {
+                        ok: true,
+                        id: 'marvin',
+                        rev: 'rev2',
+                    };
+                    mock.expects('destroy').once()
+                        .withArgs('marvin', 'rev')
+                        .yields(null, res);
+                    marvin.destroy(function (err) {
+                        marvin.get('_deleted').should.be.true;
                         done(err);
                     });
                 });
