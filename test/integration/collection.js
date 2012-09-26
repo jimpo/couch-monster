@@ -63,4 +63,59 @@ describe('Collection', function () {
             });
         });
     });
+
+    describe('#save()', function () {
+        it('should perform a bulk insertion of models', function (done) {
+            var marvin = new Monster('marvin');
+            var collection = new monster.Collection([marvin]);
+
+            var couchdb = nock('https://tigerblood.cloudant.com:443')
+                .post('/greggs-place/_bulk_docs', {
+                    docs: [
+                        {_id: 'marvin', type: 'CollectionMonster'},
+                    ]})
+                .reply(201, [{
+                    id: "marvin",
+                    rev: "1-967a00dff5e02add41819138abb3284d",
+                }]);
+
+            collection.save(function (err) {
+                couchdb.done();
+                marvin.rev().should.equal(
+                    '1-967a00dff5e02add41819138abb3284d');
+                done(err);
+            });
+        });
+
+        it('should insert models without an id', function (done) {
+            var marvin = new Monster('marvin');
+            var collection = new monster.Collection([marvin, new Monster]);
+
+            var couchdb = nock('https://tigerblood.cloudant.com:443')
+                .post('/greggs-place/_bulk_docs', {
+                    docs: [
+                        {_id: 'marvin', type: 'CollectionMonster'},
+                        {type: 'CollectionMonster'},
+                    ]})
+                .reply(201, [
+                    {
+                        id: "marvin",
+                        rev: "1-967a00dff5e02add41819138abb3284d",
+                    },
+                    {
+                        id: "518fd93e9791133ca98f8e62d32aaf6d",
+                        rev: "1-52902b3d705970ee6724c682cb4feab5"
+                    }
+                ]);
+
+            collection.save(function (err) {
+                couchdb.done();
+                collection[1].id().should.equal(
+                    '518fd93e9791133ca98f8e62d32aaf6d');
+                collection[1].rev().should.equal(
+                    '1-52902b3d705970ee6724c682cb4feab5');
+                done(err);
+            });
+        });
+    });
 });
