@@ -6,7 +6,7 @@ var _ = require('underscore');
 
 
 describe('Collection', function () {
-    var collection, Monster = monster.define('Monster');
+    var collection, Monster = monster.define('CollectionMonster');
 
     beforeEach(function () {
         collection = new monster.Collection();
@@ -65,9 +65,38 @@ describe('Collection', function () {
         describe('#fetch()', function () {
             it('should make bulk fetch call with model ids', function (done) {
                 collection.push(new Monster('marvin'), new Monster('charlie'));
-                mock.expects('fetch').withArgs(['marvin', 'charlie'])
-                    .yields(null);
-                collection.fetch(done);
+                mock.expects('fetch')
+                    .withArgs({keys: ['marvin', 'charlie']})
+                    .yields(new Error);
+                collection.fetch(function (err) {
+                    done();
+                });
+            });
+
+            it('should set model attributes with documents', function (done) {
+                collection.push(new Monster('marvin'), new Monster('charlie'));
+                sinon.spy(collection[0], 'set');
+                sinon.spy(collection[1], 'set');
+
+                var marvin = {
+                    _id: 'marvin',
+                    _rev: 'marvin-rev',
+                };
+                var charlie = {
+                    _id: 'charlie',
+                    _rev: 'charlie-rev',
+                };
+
+                mock.expects('fetch')
+                    .withArgs({keys: ['marvin', 'charlie']})
+                    .yields(null, {
+                        rows: [{doc: marvin}, {doc: charlie}],
+                    });
+                collection.fetch(function (err) {
+                    collection[0].set.should.have.been.calledWith(marvin);
+                    collection[1].set.should.have.been.calledWith(charlie);
+                    done(err);
+                });
             });
         });
     });
