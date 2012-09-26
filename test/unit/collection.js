@@ -99,5 +99,83 @@ describe('Collection', function () {
                 });
             });
         });
+
+        describe('#save()', function () {
+            it('should perform a bulk insertion of models', function (done) {
+                var marvin = new Monster('marvin', {
+                    scary: true,
+                    location: 'couch',
+                });
+                collection.push(marvin);
+
+                mock.expects('bulk')
+                    .withArgs({docs: [{
+                        _id: 'marvin',
+                        type: 'CollectionMonster',
+                        scary: true,
+                        location: 'couch',
+                    }]})
+                    .yields(null, [{
+                        id: 'marvin',
+                        rev: 'rev',
+                    }]);
+
+                collection.save(function (err) {
+                    marvin.rev().should.equal('rev');
+                    done(err);
+                });
+            });
+
+            it('should insert models without an id', function (done) {
+                var marvin = new Monster({
+                    scary: true,
+                    location: 'couch',
+                });
+                collection.push(marvin);
+
+                mock.expects('bulk')
+                    .withArgs({docs: [{
+                        type: 'CollectionMonster',
+                        scary: true,
+                        location: 'couch',
+                    }]})
+                    .yields(null, [{
+                        id: 'marvin',
+                        rev: 'rev',
+                    }]);
+
+                collection.save(function (err) {
+                    marvin.id().should.equal('marvin');
+                    marvin.rev().should.equal('rev');
+                    done(err);
+                });
+            });
+
+            it('should yield error if any document fails to save',
+               function (done) {
+                   var marvin = new Monster({
+                       scary: true,
+                       location: 'couch',
+                   });
+                   var collection = new monster.Collection([marvin]);
+
+                   mock.expects('bulk')
+                       .withArgs({docs: [{
+                           type: 'CollectionMonster',
+                           scary: true,
+                           location: 'couch',
+                       }]})
+                       .yields(null, [{
+                           id: "marvin",
+                           error: "conflict",
+                           reason: "Document update conflict.",
+                       }]);
+
+                   collection.save(function (err) {
+                       err.should.be.an('Error');
+                       done();
+                   });
+               });
+        });
     });
 });
