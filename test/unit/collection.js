@@ -157,7 +157,7 @@ describe('Collection', function () {
                        scary: true,
                        location: 'couch',
                    });
-                   var collection = new monster.Collection([marvin]);
+                   collection.push(marvin);
 
                    mock.expects('bulk')
                        .withArgs({docs: [{

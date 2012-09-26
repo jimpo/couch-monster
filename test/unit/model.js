@@ -411,26 +411,29 @@ describe('#define()', function () {
                     });
                 });
 
-                it('should yield ValidationError if model is invalid', function (done) {
-                    sinon.stub(marvin, 'validate').returns(['Oh no']);
-                    mock.expects('insert').never();
-                    marvin.save(function (err) {
-                        err.name.should.equal('ValidationError');
-                        err.errors.should.deep.equal(['Oh no']);
-                        done();
-                    });
-                });
+                it('should yield ValidationError if model is invalid',
+                   function (done) {
+                       sinon.stub(marvin, 'validate').returns(['Oh no']);
+                       mock.expects('insert').never();
+                       marvin.save(function (err) {
+                           err.name.should.equal('ValidationError');
+                           err.errors.should.deep.equal(['Oh no']);
+                           done();
+                       });
+                   });
 
-                it('should yield UniquenessError if id is taken', function(done) {
-                    mock.expects('insert').yields(errs.create({
-                        status_code: 409,
-                    }));
-                    marvin.save(function (err) {
-                        err.name.should.equal('UniquenessError');
-                        err.message.should.equal('ID "marvin" already exists');
-                        done();
-                    });
-                });
+                it('should yield UniquenessError if id is taken',
+                   function(done) {
+                       mock.expects('insert').yields(errs.create({
+                           status_code: 409,
+                       }));
+                       marvin.save(function (err) {
+                           err.name.should.equal('UniquenessError');
+                           err.message.should.equal(
+                               'ID "marvin" already exists');
+                           done();
+                       });
+                   });
             });
 
             describe('#destroy()', function () {

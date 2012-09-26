@@ -13,14 +13,13 @@ describe('Collection', function () {
         var options = {
             url: {
                 protocol: 'https',
-                hostname: 'tigerblood.cloudant.com',
+                hostname: 'cloudant.com',
                 port: 443,
-                auth: 'tigerblood:legacy',
             },
             db: 'greggs-place',
             createDatabase: true,
         };
-        nock('https://tigerblood.cloudant.com:443')
+        nock('https://cloudant.com:443')
             .get('/greggs-place')
             .reply(200);
         monster.initialize(options, done);
@@ -54,7 +53,7 @@ describe('Collection', function () {
             var marvin = new Monster('marvin');
             var collection = new monster.Collection([marvin]);
 
-            var couchdb = nock('https://tigerblood.cloudant.com:443')
+            var couchdb = nock('https://cloudant.com:443')
                 .post('/greggs-place/_all_docs?include_docs=true',
                       {keys: ["marvin"]})
                 .reply(200, res);
@@ -70,7 +69,7 @@ describe('Collection', function () {
             var marvin = new Monster('marvin');
             var collection = new monster.Collection([marvin]);
 
-            var couchdb = nock('https://tigerblood.cloudant.com:443')
+            var couchdb = nock('https://cloudant.com:443')
                 .post('/greggs-place/_bulk_docs', {
                     docs: [
                         {_id: 'marvin', type: 'CollectionMonster'},
@@ -92,7 +91,7 @@ describe('Collection', function () {
             var marvin = new Monster('marvin');
             var collection = new monster.Collection([marvin, new Monster]);
 
-            var couchdb = nock('https://tigerblood.cloudant.com:443')
+            var couchdb = nock('https://cloudant.com:443')
                 .post('/greggs-place/_bulk_docs', {
                     docs: [
                         {_id: 'marvin', type: 'CollectionMonster'},
@@ -123,7 +122,7 @@ describe('Collection', function () {
             var marvin = new Monster('marvin');
             var collection = new monster.Collection([marvin]);
 
-            nock('https://tigerblood.cloudant.com:443')
+            nock('https://cloudant.com:443')
                 .post('/greggs-place/_bulk_docs', {
                     docs: [
                         {_id: 'marvin', type: 'CollectionMonster'},
@@ -149,7 +148,7 @@ describe('Collection', function () {
             });
             var collection = new monster.Collection([marvin]);
 
-            var couchdb = nock('https://tigerblood.cloudant.com:443')
+            var couchdb = nock('https://cloudant.com:443')
                 .post('/greggs-place/_bulk_docs', {
                     docs: [
                         {
