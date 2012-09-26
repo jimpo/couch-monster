@@ -117,5 +117,27 @@ describe('Collection', function () {
                 done(err);
             });
         });
+
+        it('should yield error if any document fails to save', function (done) {
+            var marvin = new Monster('marvin');
+            var collection = new monster.Collection([marvin]);
+
+            nock('https://tigerblood.cloudant.com:443')
+                .post('/greggs-place/_bulk_docs', {
+                    docs: [
+                        {_id: 'marvin', type: 'CollectionMonster'},
+                    ]})
+                .reply(201, [
+                    {
+                        id: "marvin",
+                        error: "conflict",
+                        reason: "Document update conflict.",
+                    }
+                ]);
+            collection.save(function (err) {
+                err.should.be.an('Error');
+                done();
+            });
+        });
     });
 });
