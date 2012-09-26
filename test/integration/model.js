@@ -162,6 +162,7 @@ describe('Model', function () {
                 couchdb.done();
                 marvin.id().should.equal('marvin');
                 marvin.rev().should.equal(res.rev);
+                marvin.get('_deleted').should.be.true;
                 done(err);
             });
         });

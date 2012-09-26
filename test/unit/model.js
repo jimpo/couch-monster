@@ -437,6 +437,22 @@ describe('#define()', function () {
                         done(err);
                     });
                 });
+
+                it('should set _deleted to true', function (done) {
+                    marvin.set('_rev', 'rev');
+                    var res = {
+                        ok: true,
+                        id: 'marvin',
+                        rev: 'rev2',
+                    };
+                    mock.expects('destroy').once()
+                        .withArgs('marvin', 'rev')
+                        .yields(null, res);
+                    marvin.destroy(function (err) {
+                        marvin.get('_deleted').should.be.true;
+                        done(err);
+                    });
+                });
             });
         });
     });
