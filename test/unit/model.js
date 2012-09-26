@@ -53,10 +53,10 @@ describe('#define()', function () {
             assignment.should.throw(TypeError, /read only/);
         });
 
-        it('should make "_type" attribute readonly', function () {
+        it('should make "type" attribute readonly', function () {
             var factory = function () {
                 return new Monster({
-                    _type: 'Not Monster',
+                    type: 'Not Monster',
                 });
             };
             factory.should.throw(TypeError, /read only/);
@@ -345,14 +345,14 @@ describe('#define()', function () {
             describe('#save()', function () {
                 var res = {
                     ok: true,
-                    _id: 'marvin',
-                    _rev: 'rev',
+                    id: 'marvin',
+                    rev: 'rev',
                 };
 
-                it('should save attributes with _type', function (done) {
+                it('should save attributes with type', function (done) {
                     var expected = marvin.toJSON();
                     expected._id = 'marvin';
-                    expected._type = 'Monster';
+                    expected.type = 'Monster';
 
                     mock.expects('insert').once()
                         .withArgs(expected, 'marvin')
@@ -372,7 +372,7 @@ describe('#define()', function () {
                     marvin.unset('_id');
 
                     var expected = marvin.toJSON();
-                    expected._type = 'Monster';
+                    expected.type = 'Monster';
 
                     mock.expects('insert').once()
                         .withArgs(expected, undefined)
@@ -388,8 +388,8 @@ describe('#define()', function () {
 
                     var res = {
                         ok: true,
-                        _id: 'marvin',
-                        _rev: 'rev2',
+                        id: 'marvin',
+                        rev: 'rev2',
                     };
                     mock.expects('insert').yields(null, res);
                     marvin.save(function (err) {
@@ -425,8 +425,8 @@ describe('#define()', function () {
                     marvin.set('_rev', 'rev');
                     var res = {
                         ok: true,
-                        _id: 'marvin',
-                        _rev: 'rev2',
+                        id: 'marvin',
+                        rev: 'rev2',
                     };
                     mock.expects('destroy').once()
                         .withArgs('marvin', 'rev')
