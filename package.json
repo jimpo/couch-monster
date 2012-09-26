@@ -1,6 +1,6 @@
 {
     "name": "couch-monster",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "main": "./lib/monster",
     "engines": {
         "node": "0.8.x",
