@@ -15,6 +15,7 @@ describe('Collection', function () {
                 protocol: 'https',
                 hostname: 'tigerblood.cloudant.com',
                 port: 443,
+                auth: 'tigerblood:legacy',
             },
             db: 'greggs-place',
             createDatabase: true,
@@ -137,6 +138,35 @@ describe('Collection', function () {
             collection.save(function (err) {
                 err.should.be.an('Error');
                 done();
+            });
+        });
+    });
+
+    describe('#destroy()', function () {
+        it('should perform a bulk deletion of models', function (done) {
+            var marvin = new Monster('marvin', {
+                _rev: '1-967a00dff5e02add41819138abb3284d',
+            });
+            var collection = new monster.Collection([marvin]);
+
+            var couchdb = nock('https://tigerblood.cloudant.com:443')
+                .post('/greggs-place/_bulk_docs', {
+                    docs: [
+                        {
+                            _rev: '1-967a00dff5e02add41819138abb3284d',
+                            _id: 'marvin',
+                            _deleted: true,
+                            type: 'CollectionMonster',
+                        },
+                    ]})
+                .reply(201, [{
+                    id: "marvin",
+                    rev: "2-453987c64547392a7a21d035cc33535e",
+                }]);
+
+            collection.destroy(function (err) {
+                couchdb.done();
+                done(err);
             });
         });
     });
