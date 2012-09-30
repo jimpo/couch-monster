@@ -499,6 +499,17 @@ describe('#define()', function () {
                 query.should.respondTo('byLocation');
                 query.should.respondTo('byFriendliness');
             });
+
+            it('should set key options of query to given key', function () {
+                var query = Monster.getModel('couch');
+                query.options.key.should.equal('couch');
+            });
+
+            it('should set include_docs options of query to given key',
+               function () {
+                   var query = Monster.getModel('couch');
+                   query.options.key.should.equal('couch');
+               });
         });
     });
 });
