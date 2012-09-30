@@ -45,11 +45,32 @@ describe('Query', function () {
     });
 
     describe('execute', function () {
-        it('should call db.view with options', function () {
-            var options = {};
-            var query = new Query(options);
-            mock.expects('view').withArgs(options).yields();
-            query.execute(function () {});
+        it('should call db.view with design name, view, and options',
+           function () {
+               var query = new Query('design', 'view');
+               mock.expects('view').withArgs('design', 'view', query.options)
+                   .yields();
+               query.execute(function () {});
+           });
+
+        it('should call argument callback', function (done) {
+            var query = new Query();
+            mock.expects('view').yields();
+            query.execute(done); // If callback isn't called, test will time out
         });
+
+        it('should call argument callback with transformed results',
+           function (done) {
+               var query = new Query('design', 'view', function (callback) {
+                   return function (results) {
+                       callback(results.toUpperCase());
+                   };
+               });
+               mock.expects('view').yields('results');
+               query.execute(function (results) {
+                   results.should.equal('RESULTS');
+                   done();
+               });
+           });
     });
 });
