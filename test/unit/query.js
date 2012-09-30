@@ -8,24 +8,24 @@ describe('Query', function () {
     describe('constructor', function () {
         it('should set options to constructor argument', function () {
             var options = {descending: true};
-            var query = new Query('design', 'view', options);
+            var query = new Query('design', options);
             query.options.should.equal(options);
         });
 
         it('should set options to empty object otherwise', function () {
-            var query = new Query('design', 'view');
+            var query = new Query('design');
             query.options.should.deep.equal({});
         });
 
         it('should set options to empty object if options argument is omitted',
            function () {
-               var query = new Query('design', 'view', function () {});
+               var query = new Query('design', function () {});
                query.options.should.deep.equal({});
            });
 
         it('should set callback to constructor argument', function () {
             var callback = function () {};
-            var query = new Query('design', 'view', null, callback);
+            var query = new Query('design', null, callback);
             query.callback.should.equal(callback);
         });
     });
@@ -170,27 +170,28 @@ describe('Query', function () {
 
         it('should call db.view with design name, view, and options',
            function () {
-               var query = new Query('design', 'view');
+               var query = new Query('design');
                mock.expects('view').withArgs('design', 'view', query.options)
                    .yields();
-               query.execute(function () {});
+               query.execute('view', function () {});
            });
 
         it('should call argument callback', function (done) {
             var query = new Query();
             mock.expects('view').yields();
-            query.execute(done); // If callback isn't called, test will time out
+            // If callback isn't called, test will time out
+            query.execute('view', done);
         });
 
         it('should call argument callback with transformed results',
            function (done) {
-               var query = new Query('design', 'view', function (callback) {
+               var query = new Query('design', function (callback) {
                    return function (results) {
                        callback(results.toUpperCase());
                    };
                });
                mock.expects('view').yields('results');
-               query.execute(function (results) {
+               query.execute('view', function (results) {
                    results.should.equal('RESULTS');
                    done();
                });
