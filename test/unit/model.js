@@ -1,6 +1,7 @@
 'use strict';
 
 var monster = require('monster');
+var Query = require('query');
 
 var errs = require('errs');
 
@@ -469,6 +470,34 @@ describe('#define()', function () {
                         done(err);
                     });
                 });
+            });
+        });
+    });
+
+    describe('views', function () {
+        var Monster;
+
+        before(function () {
+            Monster = monster.define('QueryMonster', {
+                views: {
+                    byLocation: {},
+                    byFriendliness: {},
+                }
+            });
+        });
+
+        describe('getModel()', function () {
+            it('should return a query with design document no view',
+               function () {
+                   var query = Monster.getModel('couch');
+                   query.should.be.an.instanceOf(Query);
+                   query.design.should.equal(Monster.name);
+               });
+
+            it('should return a query responding to views', function () {
+                var query = Monster.getModel('couch');
+                query.should.respondTo('byLocation');
+                query.should.respondTo('byFriendliness');
             });
         });
     });
