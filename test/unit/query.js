@@ -197,4 +197,23 @@ describe('Query', function () {
                });
            });
     });
+
+    describe('#addView()', function () {
+        it('should add method to query with view name', function () {
+            var query = new Query;
+            query.addView('byScariness');
+            query.should.respondTo('byScariness');
+        });
+
+        it('should add method that calls execute with view and callback',
+           function () {
+               var query = new Query;
+               var callback = function () {};
+               query.addView('byScariness');
+               sinon.stub(query, 'execute');
+               query.byScariness(callback);
+               query.execute.should.have.been.calledWith(
+                   'byScariness', callback);
+           });
+    });
 });
