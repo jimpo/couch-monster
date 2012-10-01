@@ -500,16 +500,12 @@ describe('#define()', function () {
                 query.should.respondTo('byFriendliness');
             });
 
-            it('should set key options of query to given key', function () {
+            it('should set query options appropriately', function () {
                 var query = Monster.getModel('couch');
                 query.options.key.should.equal('couch');
+                query.options.include_docs.should.be.true;
+                query.options.limit.should.equal(2);
             });
-
-            it('should set include_docs options of query to given key',
-               function () {
-                   var query = Monster.getModel('couch');
-                   query.options.key.should.equal('couch');
-               });
         });
     });
 });
