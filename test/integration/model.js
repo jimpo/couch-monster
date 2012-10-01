@@ -204,6 +204,21 @@ describe('Model', function () {
                 });
             });
 
+            it('should return yield nothing if no document is found',
+               function (done) {
+                   scope
+                       .get('/greggs-place/_design/QueryMonster/_view/byLocation?key=%22couch%22&include_docs=true&limit=2')
+                       .reply(200, {
+                           total_rows: 0,
+                           offset: 0,
+                           rows: [],
+                       });
+                   Monster.getModel('couch').byLocation(function (err, model) {
+                       expect(model).not.to.exist;
+                       done(err);
+                   });
+               });
+
             it('should yield Error if view does not exist',
                function (done) {
                    var path = '/greggs-place/_design/QueryMonster/_view/' +
@@ -219,6 +234,23 @@ describe('Model', function () {
                        scope.done();
                        err.should.be.an('Error');
                        err.status_code.should.equal(404);
+                       done();
+                   });
+               });
+
+            it('should return yield error if multiple documents found',
+               function (done) {
+                   scope
+                       .get('/greggs-place/_design/QueryMonster/_view/byLocation?key=%22couch%22&include_docs=true&limit=2')
+                       .reply(200, {
+                           total_rows: 2,
+                           offset: 2,
+                           rows: [{doc: {}}, {doc: {}}],
+                       });
+                   Monster.getModel('couch').byLocation(function (err, model) {
+                       expect(err).to.exist;
+                       err.name.should.equal('ViewError');
+                       err.message.should.equal('Multiple documents found');
                        done();
                    });
                });
