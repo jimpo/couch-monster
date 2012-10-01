@@ -475,7 +475,7 @@ describe('#define()', function () {
     });
 
     describe('views', function () {
-        var Monster;
+        var Monster, mock;
 
         before(function () {
             Monster = monster.define('QueryMonster', {
@@ -486,7 +486,25 @@ describe('#define()', function () {
             });
         });
 
+        beforeEach(function () {
+            monster.db = {
+                view: function(){},
+            };
+            mock = sinon.mock(monster.db);
+        });
+
+        afterEach(function () {
+            mock.verify();
+            mock.restore();
+        });
+
         describe('getModel()', function () {
+            var options = {
+                key: 'couch',
+                include_docs: true,
+                limit: 2,
+            };
+
             it('should return a query with design document no view',
                function () {
                    var query = Monster.getModel('couch');
@@ -506,6 +524,60 @@ describe('#define()', function () {
                 query.options.include_docs.should.be.true;
                 query.options.limit.should.equal(2);
             });
+
+            it('should return model of fetched document', function (done) {
+                var marvin = {
+                    _id: 'marvin',
+                    _rev: 'rev',
+                    type: 'QueryMonster',
+                    location: 'couch',
+                };
+                mock.expects('view')
+                    .withArgs('QueryMonster', 'byLocation', options)
+                    .yields(null, {
+                        total_rows: 1,
+                        offset: 1,
+                        rows: [{doc: marvin}],
+                    });
+                Monster.getModel('couch').byLocation(function (err, model) {
+                    delete marvin.type;
+                    model.should.be.an.instanceOf(Monster);
+                    model.attributes.should.deep.equal(marvin);
+                    done(err);
+                });
+            });
+
+            it('should return yield nothing if no document is found',
+               function (done) {
+                   mock.expects('view')
+                       .withArgs('QueryMonster', 'byLocation', options)
+                       .yields(null, {
+                           total_rows: 0,
+                           offset: 0,
+                           rows: [],
+                       });
+                   Monster.getModel('couch').byLocation(function (err, model) {
+                       expect(model).not.to.exist;
+                       done(err);
+                   });
+               });
+
+            it('should return yield error if multiple documents found',
+               function (done) {
+                   mock.expects('view')
+                       .withArgs('QueryMonster', 'byLocation', options)
+                       .yields(null, {
+                           total_rows: 2,
+                           offset: 2,
+                           rows: [{doc: {}}, {doc: {}}],
+                       });
+                   Monster.getModel('couch').byLocation(function (err, model) {
+                       expect(err).to.exist;
+                       err.name.should.equal('ViewError');
+                       err.message.should.equal('Multiple documents found');
+                       done();
+                   });
+               });
         });
     });
 });
