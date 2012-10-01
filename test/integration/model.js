@@ -255,5 +255,73 @@ describe('Model', function () {
                    });
                });
         });
+
+        describe('#getCollection()', function () {
+            it('should return collection of fetched documents',
+               function (done) {
+                   var marvin = {
+                       _id: 'marvin',
+                       _rev: 'rev',
+                       type: 'QueryMonster',
+                       location: 'couch',
+                   };
+                   scope
+                       .get('/greggs-place/_design/QueryMonster/_view/byLocation?include_docs=true')
+                       .reply(200, {
+                           total_rows: 2,
+                           offset: 2,
+                           rows: [{doc: marvin}, {doc: marvin}],
+                       });
+                   Monster.getCollection().byLocation(function (err, collection) {
+                       delete marvin.type;
+                       collection.length.should.equal(2);
+                       collection.each(function (model) {
+                           model.should.be.an.instanceOf(Monster);
+                           model.attributes.should.deep.equal(marvin);
+                       });
+                       done(err);
+                   });
+               });
+
+            it('should yield Error if view does not exist',
+               function (done) {
+                   scope
+                       .get('/greggs-place/_design/QueryMonster/_view/byLocation?include_docs=true')
+                       .reply(404, {
+                           error: "not_found",
+                           reason: "missing"
+                       });
+                   Monster.getCollection().byLocation(function (err, collection) {
+                       scope.done();
+                       err.should.be.an('Error');
+                       err.status_code.should.equal(404);
+                       done();
+                   });
+               });
+
+            it('should return yield error if document\'s type is unknown',
+               function (done) {
+                   var marvin = {
+                       _id: 'marvin',
+                       _rev: 'rev',
+                       type: 'UnknownMonster',
+                       location: 'couch',
+                   };
+                   scope
+                       .get('/greggs-place/_design/QueryMonster/_view/byLocation?include_docs=true')
+                       .reply(200, {
+                           total_rows: 2,
+                           offset: 2,
+                           rows: [{doc: marvin}, {doc: marvin}],
+                       });
+                   Monster.getCollection().byLocation(function (err, collection) {
+                       expect(err).to.exist;
+                       err.name.should.equal('ViewError');
+                       err.message.should.equal(
+                           'Unknown document type "UnknownMonster"');
+                       done();
+                   });
+               });
+        });
     });
 });
